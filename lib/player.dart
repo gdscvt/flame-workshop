@@ -32,7 +32,7 @@ class Player extends SpriteAnimationGroupComponent with HasGameRef {
   double count = 0;
 
   @override
-  Future<void>? onLoad() async {
+  Future<void> onLoad() async {
     await super.onLoad();
 
     // Sprite size (48x48 px)
