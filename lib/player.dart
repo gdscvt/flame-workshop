@@ -1,11 +1,12 @@
 import 'dart:math';
 
 import 'package:flame/components.dart';
+import 'package:flame/extensions.dart';
 import 'package:flame/flame.dart';
 
 enum Animation { down, left, right, up }
 
-class Player extends SpriteAnimationGroupComponent with HasGameRef {
+class Player extends SpriteAnimationGroupComponent<Animation> with HasGameRef {
   static final Random random = Random();
 
   static const Map<Animation, String> animationPaths = {
@@ -42,15 +43,18 @@ class Player extends SpriteAnimationGroupComponent with HasGameRef {
     position = (gameRef.size - size) / 2;
 
     // Mapping of Animation to sprite animation data
-    animations = {};
+    animations = Map.fromEntries(await Future.wait(
+        Animation.values.map((key) => loadSpriteAnimation(key))));
+  }
 
-    // Fill the map
-    for (Animation animation in Animation.values) {
-      animations![animation] = SpriteAnimation.fromFrameData(
-          await Flame.images.load(animationPaths[animation]!),
-          SpriteAnimationData.sequenced(
-              amount: frameCount, stepTime: frameLength, textureSize: size));
-    }
+  Future<MapEntry<Animation, SpriteAnimation>> loadSpriteAnimation(
+      Animation key) async {
+    Image sprite = await Flame.images.load(animationPaths[key]!);
+
+    SpriteAnimationData animationData = SpriteAnimationData.sequenced(
+        amount: frameCount, stepTime: frameLength, textureSize: size);
+
+    return MapEntry(key, SpriteAnimation.fromFrameData(sprite, animationData));
   }
 
   @override
